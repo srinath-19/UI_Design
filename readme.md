@@ -246,7 +246,7 @@ This file provides a compact summary of the analyzed layout and is useful for re
 
 ## 7. Design Notes and Accuracy Clarifications
 
-- The system appears to be **JSON-first** in its current export workflow, even if additional export formats are discussed conceptually.
+- The system is **JSON-first** in its current export workflow, even if additional export formats were discussed conceptually.
 - Room-boundary generation is based on **closed contour detection** from structural annotations, not on semantic architectural reasoning.
 - The user plays an important role in the workflow by correcting false positives, refining room boundaries, and assigning labels.
 - Locators depend on accurate scale calibration, so the correctness of the real-world measurement step directly affects locator placement.
@@ -258,6 +258,7 @@ This file provides a compact summary of the analyzed layout and is useful for re
 ## 8. Conclusion
 
 The 2D Vectorizer UI is designed as an interactive annotation and review environment for converting floor plan documents into structured spatial data. Its combination of automated inference, manual correction tools, room-boundary generation, scale calibration, and exportable JSON outputs makes it suitable for iterative layout analysis workflows where both automation and user validation are required.
+
 
 
 
