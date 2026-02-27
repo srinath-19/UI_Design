@@ -1,13 +1,15 @@
 # CSCI 5050 UI Design
 
-**Project:** 2D Vectorizer  
+**Project:**  2D Floorplan Vectorizer  
 **Team:** Amr Barakat, Nidhi Sankhe, Srinath Muppala, Chetan Badiger, Harini Padamata
 
 ---
 
 ## 1. Overview
 
-The **2D Vectorizer** web application is the primary workspace for uploading, reviewing, annotating, and exporting 2D floor plan data. The interface is designed to accept floor plan inputs such as **PNG images** and **PDF files**, organize them within a project session, and guide the user through a workflow that converts visual layouts into structured outputs.
+The **2D Floorplan Vectorizer** web application is the primary workspace for uploading, reviewing, annotating, and exporting 2D floor plan data. The interface is designed to accept floor plan inputs such as **PNG images** and **PDF files**, organize them within a project session, and guide the user through a workflow that converts visual layouts into structured outputs.
+
+![image](landing_page.png)
 
 From this workspace, a user can:
 
@@ -67,17 +69,32 @@ The center canvas displays the uploaded floor plan and acts as the primary revie
 ### 3.1 Initial landing page
 The landing page presents a clean, workspace-oriented interface with an empty central canvas, a left-side panel for project and annotation controls, and a top toolbar for visibility settings, pipeline status, zoom controls, and export actions.
 
+![image](landing_page.png)
+
 ### 3.2 Uploaded image with crop mode
 After an image is uploaded, the selected floor plan is shown on the canvas. When the **Crop** tool is active, the user can define a rectangular region of interest directly on the canvas using a draggable dashed outline. This allows the user to isolate the relevant portion of the floor plan before further annotation or vectorization.
+
+![image](crop.png)
+### After crop
+![image](aftercrop.png)
 
 ### 3.3 Resume project behavior
 If the user uploads a previous annotation file, the application restores the earlier detections and overlays them on the current floor plan. This allows the user to continue editing instead of restarting the annotation process from scratch.
 
+![image](resume.png)
+### after resuming the project
+![image](afterresume.png)
+
 ### 3.4 Room labels and filtered overlays
 After room labels are added, the labels are displayed directly on the canvas and saved in the database. The user can also choose which categories of detections are visible on the canvas, allowing them to focus on only the layers they need, such as annotations, locators, or unit markers.
 
+![image](visibleoptions.png)
+![image](roomnames.png)
+
 ### 3.5 Alert on rerunning the pipeline
 When the user reruns the pipeline with a new image, the application displays an alert indicating that the current analysis will be lost. This prevents accidental overwriting of existing work.
+
+![image](lostprogress.png)
 
 ---
 
@@ -109,26 +126,12 @@ When the user reruns the pipeline with a new image, the application displays an 
 **Notes:**  
 The user can upload either a PNG image or a PDF file for inference. Once the file is selected, it becomes the active project input and is shown on the canvas.
 
----
-
-### Scenario 2: Starting or Resuming Processing
-**Goal:** Allow users to either run a fresh pipeline or continue from previously saved annotations.
-
-**Given** a valid floor plan file has been uploaded  
-**When** the user selects **Run Pipeline**  
-**Then** the system should begin detection and analysis on the uploaded input
-
-**And Given** a user has a previous annotation file for the same floor plan  
-**When** the user selects **Resume Project** and uploads the saved annotations  
-**Then** the system should restore those annotations on the canvas  
-**And** allow the user to continue editing from the previous state
-
-**Notes:**  
-Running the pipeline starts a new inference pass. Resuming a project loads existing annotation data so the user does not lose prior work.
+![image](upload.png)
+![image](afterselecting.png)
 
 ---
 
-### Scenario 3: Manual or Existing Annotations
+### Scenario 2: Manual or Existing Annotations
 **Goal:** Support both automatic initialization and manual annotation workflows.
 
 **Given** the floor plan image has been preprocessed successfully  
@@ -145,23 +148,11 @@ Running the pipeline starts a new inference pass. Resuming a project loads exist
 **Notes:**  
 The user is not limited to system-generated detections. They can manually add or correct walls, windows, doors, and other annotation elements through the tools panel.
 
+![image](intialinference.png)
+![image](resume.png)
 ---
 
-### Scenario 4: Cropping the Image
-**Goal:** Let the user isolate the relevant portion of a large image before or during processing.
-
-**Given** a floor plan is visible on the canvas  
-**When** the user activates the **Crop** tool  
-**Then** the system should allow the user to define a rectangular crop region  
-**And** show that region as a draggable dashed outline  
-**And** use the selected crop region as the active area for downstream processing or review
-
-**Notes:**  
-Cropping is useful when the uploaded document contains extra content such as title blocks, margins, or unrelated drawing regions.
-
----
-
-### Scenario 5: Detecting Room Boundaries
+### Scenario 4: Detecting Room Boundaries
 **Goal:** Convert structural detections into room-like enclosed regions.
 
 **Given** the annotated or preprocessed floor plan image is available  
@@ -173,48 +164,18 @@ Cropping is useful when the uploaded document contains extra content such as tit
 **Notes:**  
 The room-boundary algorithm uses the available structural detections to find closed regions. In practice, it does not strictly distinguish between walls, doors, and windows during contour closure; instead, it looks for usable closed boundaries and renders the resulting room outlines, typically in red.
 
+![image](inferencewithrooms.png)
+
+### The user can delete unwanted detections and edit the room boundaries
+
+![image](editrooms.png)
+
+### add room labels for the detected room boundaries.
+
+![image](addroomlabels.png)
 ---
 
-### Scenario 6: Editing Boundary Detections
-**Goal:** Allow users to correct imperfect automatic results.
-
-**Given** room boundaries have been generated  
-**When** the user edits, deletes, or refines a boundary or its supporting detections  
-**Then** the system should update the displayed room outlines  
-**And** recalculate room boundaries based on the updated annotation state
-
-**Notes:**  
-Automatic detections may incorrectly treat cubicles or interior furniture-like structures as walls, which can create false room boundaries. The user can delete these unwanted detections and the room-boundary logic will recompute using the revised structure set.
-
----
-
-### Scenario 7: Labeling Rooms
-**Goal:** Let users assign meaningful semantic labels to detected spaces.
-
-**Given** room boundaries are visible on the canvas  
-**When** the user enters or updates a room label  
-**Then** the label should be displayed on the UI  
-**And** saved in the database with the corresponding room boundary and source floor plan
-
-**Notes:**  
-This allows room boundaries to become usable structured entities, such as *Kitchen*, *Office*, or *Conference Room*.
-
----
-
-### Scenario 8: Defining Scale and Locator Placement
-**Goal:** Convert the floor plan from pixel space into a real-world spatial layout.
-
-**Given** the user knows at least one real-world wall dimension  
-**When** the user enters the length of a reference wall and applies scale  
-**Then** the system should calibrate the floor plan to real-world units  
-**And** place locators based on the configured device range
-
-**Notes:**  
-In the current design, locators are placed using a configurable coverage radius (described by the team as approximately **30 meters**, depending on the chosen scale). The user is expected to provide a known outer or major wall dimension so that the application can convert the drawing into meaningful spatial measurements. Locator positions can also be manually edited, deleted, or added.
-
----
-
-### Scenario 9: Exporting Detected Layouts
+### Scenario 4: Exporting Detected Layouts
 **Goal:** Ensure users can export the processed layout in a usable structured format.
 
 **Given** the room boundaries and supporting annotations have been finalized  
@@ -229,7 +190,26 @@ Based on the current UI and project description, the primary export flow is cent
 - Room-boundary JSON
 - Component count JSON
 
-If additional vector formats such as SVG or DXF are planned, they should be described as future support unless already implemented.
+![image](jsonWWD.png)
+![image](jsonrooms.png)
+![image](jsoncounts.png)
+
+---
+
+### Scenario 5: Defining Scale and Locator Placement (This is the new feature the sponsors requested)
+**Goal:** Convert the floor plan from pixel space into a real-world spatial layout.
+
+**Given** the user knows at least one real-world wall dimension  
+**When** the user enters the length of a reference wall and applies scale  
+**Then** the system should calibrate the floor plan to real-world units  
+**And** place locators based on the configured device range
+
+**Notes:**  
+In the current design, locators are placed using a configurable coverage radius (described by the team as approximately **30 meters**, depending on the chosen scale). The user is expected to provide a known outer or major wall dimension so that the application can convert the drawing into meaningful spatial measurements. Locator positions can also be manually edited, deleted, or added.
+
+![image](autolocators.png)
+### editing or adding or deleting the locators
+![image](editlocators.png)
 
 ---
 
@@ -255,8 +235,12 @@ This JSON output contains summary counts for detected objects in the floor plan,
 
 This file provides a compact summary of the analyzed layout and is useful for reporting or downstream application logic.
 
-### 6.3 Vectorized floor plan output
-The exported JSON can also be used to reconstruct a vectorized representation of the floor plan. This output reflects the structured geometry of the layout rather than the original raster image.
+### 6.3 Anotation JSON
+ This JSON output contains the Yolo OBB bounding boxes in JSON format.
+
+ class 0 - Walls
+ class 1 - Windows
+ class 2 - Doors
 
 ---
 
@@ -270,20 +254,11 @@ The exported JSON can also be used to reconstruct a vectorized representation of
 
 ---
 
-## 8. Suggested Caption Snippets for Figures
 
-These can be used under screenshots in the final document:
-
-- **Figure: Landing Page** - The main 2D Vectorizer workspace showing project controls, annotation tools, visibility filters, and export actions around a central editing canvas.
-- **Figure: Crop Tool** - The uploaded floor plan displayed with an active crop region, allowing the user to isolate the relevant layout area before further processing.
-- **Figure: Room Boundary Detection** - Automatically generated room boundaries overlaid on the floor plan for user verification and correction.
-- **Figure: Resume Project** - Previously saved annotations reloaded onto the canvas so the user can continue editing from an earlier session.
-- **Figure: Labeled Room Boundaries** - Room names displayed directly on the canvas after the user assigns semantic labels to detected regions.
-- **Figure: Locator Placement** - Locator coverage positions generated after scale calibration using a known wall dimension.
-- **Figure: Exported JSON** - Structured JSON output representing room boundaries, labels, and count summaries for downstream use.
-
----
-
-## 9. Conclusion
+## 8. Conclusion
 
 The 2D Vectorizer UI is designed as an interactive annotation and review environment for converting floor plan documents into structured spatial data. Its combination of automated inference, manual correction tools, room-boundary generation, scale calibration, and exportable JSON outputs makes it suitable for iterative layout analysis workflows where both automation and user validation are required.
+
+
+
+
